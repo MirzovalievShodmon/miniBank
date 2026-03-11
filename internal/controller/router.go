@@ -28,7 +28,7 @@ func InitRoutes() {
 		case "4":
 			GetAllTransactions()
 		default:
-			fmt.Println("Несуществующая команда, побробуйте еще раз ...")
+			fmt.Println("Несуществующая команда, попробуйте еще раз ...")
 		}
 	}
 }

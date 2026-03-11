@@ -3,9 +3,9 @@ package models
 import "time"
 
 type Transaction struct {
-	ID        int
-	Amount    float64
-	Type      string
-	CreatedAt time.Time
-	AccountID int
+	ID        int       `db:"id"`
+	Amount    float64   `db:"amount"`
+	Type      string    `db:"type"`
+	CreatedAt time.Time `db:"created_at"`
+	AccountID int       `db:"account_id"`
 }

@@ -48,7 +48,7 @@ func WithdrawAccount(accountID int, amount float64) error {
 	}
 
 	if account.Balance < amount {
-		return errors.New("недостаточно средст на счета")
+		return errors.New("недостаточно средств на счета")
 	}
 
 	// пополнение аккаунта
@@ -68,6 +68,6 @@ func WithdrawAccount(accountID int, amount float64) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }

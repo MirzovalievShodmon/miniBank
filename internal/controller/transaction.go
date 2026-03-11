@@ -22,7 +22,7 @@ func GetAllTransactions() {
 	}
 
 	for _, t := range transactions {
-		fmt.Printf("ID: %d, Сумма: %2.f, Счет: %d, Тип: %s,Время создания: %v\n",
+		fmt.Printf("ID: %d, Сумма: %.2f, Счет: %d, Тип: %s,Время создания: %v\n",
 			t.ID, t.Amount, t.AccountID, t.Type, t.CreatedAt)
 	}
 	fmt.Println("=============================")

@@ -15,7 +15,7 @@ func GetAllAccounts() {
 
 	fmt.Println("===== Список счетов =====")
 	for _, a := range accounts {
-		fmt.Printf("ID: %d, Баланс: %2.f, Владелец: %s\n", a.ID, a.Balance, a.Owner)
+		fmt.Printf("ID: %d, Баланс: %.2f, Владелец: %s\n", a.ID, a.Balance, a.Owner)
 	}
 	fmt.Println("=========================")
 }
