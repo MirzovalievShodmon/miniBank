@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"database/sql"
+	"errors"
+
 	"github.com/MirzovalievShodmon/miniBank.git/internal/db"
 	"github.com/MirzovalievShodmon/miniBank.git/internal/models"
 )
@@ -20,6 +23,10 @@ func GetAccountByID(id int) (models.Account, error) {
 
 	err := db.GetDBConnection().Get(&account, "SELECT id,balance,owner FROM accounts WHERE id = $1", id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.Account{}, errors.New("счет с таким ID не существует")
+		}
+
 		return models.Account{}, err
 	}
 
