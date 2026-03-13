@@ -7,6 +7,7 @@ import (
 	"github.com/MirzovalievShodmon/miniBank.git/internal/db"
 )
 
+// The Power of Justice
 func main() {
 	if err := db.InitConnection(); err != nil {
 		fmt.Println("Error during database connection initialization: ", err.Error())
