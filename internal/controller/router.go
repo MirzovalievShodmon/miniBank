@@ -31,7 +31,7 @@ func InitRoutes(log zerolog.Logger) {
 		case "3":
 			GetAllAccounts(log)
 		case "4":
-			GetAllTransactions(log)
+			GetAllTransactions()
 		default:
 			fmt.Println("Несуществующая команда, попробуйте еще раз ...")
 			fmt.Println()
