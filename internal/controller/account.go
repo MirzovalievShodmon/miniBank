@@ -120,7 +120,7 @@ func WithdrawAccount(log zerolog.Logger) {
 
 	err = service.WithdrawAccount(accountID, amount)
 	if err != nil {
-		fmt.Printf("Ошибка при снятии денег со счета: %s\n", err.Error())
+		log.Error().Err(err).Msg("Ошибка при снятии денег со счета")
 		fmt.Println("==================================================")
 		fmt.Println()
 		return

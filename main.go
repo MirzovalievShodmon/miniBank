@@ -9,6 +9,9 @@ import (
 
 // The Power of Justice
 // Закончить правильную обработку ошибок
+// gin-gonic
+// swagger
+// Добавить функцию перевод между абонентами
 func main() {
 	// Инициализация zerolog
 	log := logger.InitLogger()
@@ -33,9 +36,4 @@ func main() {
 	}
 
 	controller.InitRoutes(log)
-
-	//if err := db.CloseConnection(); err != nil {
-	//	fmt.Println("Error during database connection close: ", err.Error())
-	//	return
-	//}
 }
