@@ -1,6 +1,8 @@
 package db
 
-import "fmt"
+import (
+	"github.com/rs/zerolog"
+)
 
 const (
 	createTableAccountsDDL = `CREATE TABLE IF NOT EXISTS accounts
@@ -20,16 +22,16 @@ const (
 );`
 )
 
-func RunMigrations() error {
+func RunMigrations(log zerolog.Logger) error {
 	_, err := db.Exec(createTableAccountsDDL)
 	if err != nil {
-		fmt.Println("error creating accounts table")
+		log.Error().Err(err).Msg("error creating accounts table")
 		return err
 	}
-	
+
 	_, err = db.Exec(createTableTransactionsDDL)
 	if err != nil {
-		fmt.Println("error creating transactions table")
+		log.Error().Err(err).Msg("error creating transactions table")
 		return err
 	}
 

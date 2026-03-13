@@ -2,12 +2,13 @@ package controller
 
 import (
 	"fmt"
+	"github.com/rs/zerolog"
 	"strconv"
 
 	"github.com/MirzovalievShodmon/miniBank.git/internal/service"
 )
 
-func GetAllAccounts() {
+func GetAllAccounts(log zerolog.Logger) {
 	accounts, err := service.GetAllAccounts()
 	if err != nil {
 		fmt.Printf("Ошибка при получении списка счетов: %s\n", err.Error())
@@ -32,13 +33,13 @@ func GetAllAccounts() {
 	fmt.Println()
 }
 
-func TopUpAccount() {
+func TopUpAccount(log zerolog.Logger) {
 	fmt.Println("===== Пополнение счета =====")
 	fmt.Println("Введите ID счета, который хотите пополнить")
-	idStr := readInput()
+	idStr := readInput(log)
 	accountID, err := strconv.Atoi(idStr)
 	if err != nil {
-		fmt.Println("Ошибка: ID должен быть числом.")
+		fmt.Println("Ошибка: ID должен быть числом: ", err)
 		fmt.Println("==================================================")
 		fmt.Println()
 		return
@@ -52,7 +53,7 @@ func TopUpAccount() {
 	}
 
 	fmt.Println("Введите сумму на которую хотите пополнить:")
-	amountStr := readInput()
+	amountStr := readInput(log)
 	amount, err := strconv.ParseFloat(amountStr, 64)
 	if err != nil {
 		fmt.Println("Ошибка: Неверный формат суммы. Используйте цифры")
@@ -81,10 +82,10 @@ func TopUpAccount() {
 	fmt.Println()
 }
 
-func WithdrawAccount() {
+func WithdrawAccount(log zerolog.Logger) {
 	fmt.Println("===== Снятие со счета =====")
 	fmt.Println("Введите ID счета с которого хотите снять деньги:")
-	idStr := readInput()
+	idStr := readInput(log)
 	accountID, err := strconv.Atoi(idStr)
 	if err != nil {
 		fmt.Println("Ошибка: ID должен быть числом")
@@ -101,7 +102,7 @@ func WithdrawAccount() {
 	}
 
 	fmt.Println("Введите сумму которую хотите снять:")
-	amountStr := readInput()
+	amountStr := readInput(log)
 	amount, err := strconv.ParseFloat(amountStr, 64)
 	if err != nil {
 		fmt.Println("Ошибка: Неверный формат суммы. Используйте цифры")

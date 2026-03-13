@@ -1,8 +1,11 @@
 package controller
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/rs/zerolog"
+)
 
-func InitRoutes() {
+func InitRoutes(log zerolog.Logger) {
 	fmt.Println()
 	fmt.Println("----------------------------------")
 	fmt.Println("---Добро пожаловать в miniBank!---")
@@ -16,19 +19,19 @@ func InitRoutes() {
 		fmt.Println("4. История операций")
 		fmt.Println()
 		fmt.Println("---Выберите нужный пункт:")
-		cmd := readInput()
+		cmd := readInput(log)
 		switch cmd {
 		case "0":
 			fmt.Println("До скорой встречи!)")
 			return
 		case "1":
-			TopUpAccount()
+			TopUpAccount(log)
 		case "2":
-			WithdrawAccount()
+			WithdrawAccount(log)
 		case "3":
-			GetAllAccounts()
+			GetAllAccounts(log)
 		case "4":
-			GetAllTransactions()
+			GetAllTransactions(log)
 		default:
 			fmt.Println("Несуществующая команда, попробуйте еще раз ...")
 			fmt.Println()

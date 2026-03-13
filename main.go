@@ -1,28 +1,41 @@
 package main
 
 import (
-	"fmt"
+	"github.com/MirzovalievShodmon/miniBank.git/internal/pkg/logger"
 
 	"github.com/MirzovalievShodmon/miniBank.git/internal/controller"
 	"github.com/MirzovalievShodmon/miniBank.git/internal/db"
 )
 
 // The Power of Justice
+// Закончить правильную обработку ошибок
 func main() {
-	if err := db.InitConnection(); err != nil {
-		fmt.Println("Error during database connection initialization: ", err.Error())
+	// Инициализация zerolog
+	log := logger.InitLogger()
+	log.Info().Msg("App started.")
+
+	// Инициализация базы данных
+	if err := db.InitConnection(log); err != nil {
+		log.Error().Err(err).Msg("error during database connection initialization")
+		return
+	}
+	defer func() {
+		err := db.CloseConnection()
+		if err != nil {
+			log.Error().Err(err).Msg("error during database connection close")
+			return
+		}
+	}()
+
+	if err := db.RunMigrations(log); err != nil {
+		log.Error().Err(err).Msg("Error during database migrations")
 		return
 	}
 
-	if err := db.RunMigrations(); err != nil {
-		fmt.Println("Error during database migrations: ", err.Error())
-		return
-	}
+	controller.InitRoutes(log)
 
-	controller.InitRoutes()
-
-	if err := db.CloseConnection(); err != nil {
-		fmt.Println("Error during database connection close: ", err.Error())
-		return
-	}
+	//if err := db.CloseConnection(); err != nil {
+	//	fmt.Println("Error during database connection close: ", err.Error())
+	//	return
+	//}
 }

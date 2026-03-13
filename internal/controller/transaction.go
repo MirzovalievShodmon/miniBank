@@ -6,7 +6,7 @@ import (
 	"github.com/MirzovalievShodmon/miniBank.git/internal/service"
 )
 
-func GetAllTransactions() {
+func GetAllTransactions(log zerolog.Logger) {
 	transactions, err := service.GetAllTransactions()
 	if err != nil {
 		fmt.Printf("Ошибка при транзакции: %s\n", err.Error())
