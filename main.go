@@ -12,6 +12,7 @@ import (
 // gin-gonic
 // swagger
 // Добавить функцию перевод между абонентами
+// DOnt give Up, Keep Going, You Can Do It!
 func main() {
 	// Инициализация zerolog
 	log := logger.InitLogger()
