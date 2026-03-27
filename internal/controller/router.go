@@ -16,9 +16,15 @@ func InitRoutes() error {
 
 	accountsG.GET("", getAllAccounts)
 
+	accountsG.GET("/search", getAccountsByOwner)
+
 	accountsG.POST("/:id/top-up", topUpAccount)
 
-	accountsG.POST("/:id/withdraw", WithdrawAccount)
+	accountsG.POST("/:id/withdraw", withdrawAccount)
+
+	accountsG.POST("/transfer", transferAccount)
+
+	accountsG.GET("/:id/transactions", getTransactionsByAccountID)
 
 	r.GET("/transactions", getAllTransactions)
 
