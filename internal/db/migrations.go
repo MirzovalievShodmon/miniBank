@@ -1,19 +1,21 @@
 package db
 
-import "fmt"
+import (
+	"log"
+)
 
 const (
 	createTableAccountsDDL = `CREATE TABLE IF NOT EXISTS accounts
 (
 	id SERIAL PRIMARY KEY,
-	balance FLOAT,
+	balance BIGINT DEFAULT 0,
 	owner VARCHAR
 );`
 
 	createTableTransactionsDDL = `CREATE TABLE IF NOT EXISTS transactions
 (
 	id SERIAL PRIMARY KEY,
-	amount FLOAT,
+	amount BIGINT,
 	type VARCHAR,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	account_id INT REFERENCES accounts (id)
@@ -21,17 +23,21 @@ const (
 )
 
 func RunMigrations() error {
+	log.Println("[DB] Создание таблицы accounts...")
 	_, err := db.Exec(createTableAccountsDDL)
 	if err != nil {
-		fmt.Println("error creating accounts table")
+		log.Printf("[ERROR] Не удалось создать таблицу accounts: %v", err)
 		return err
 	}
-	
+	log.Println("[DB] Таблтца accounts готова")
+
+	log.Println("[DB] Создание таблицы transactions...")
 	_, err = db.Exec(createTableTransactionsDDL)
 	if err != nil {
-		fmt.Println("error creating transactions table")
+		log.Printf("[ERROR] Не удалось создать таблицу transactions: %v", err)
 		return err
 	}
+	log.Println("[DB] Таблица transactions готова")
 
 	return nil
 }

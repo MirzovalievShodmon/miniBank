@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/MirzovalievShodmon/miniBank.git/internal/models"
 	"github.com/MirzovalievShodmon/miniBank.git/internal/service"
 	"github.com/gin-gonic/gin"
 )
@@ -11,6 +12,11 @@ func getAllTransactions(c *gin.Context) {
 		c.JSON(400, gin.H{
 			"error": err.Error(),
 		})
+		return
+	}
+
+	if len(transactions) == 0 {
+		c.JSON(200, []models.Transaction{})
 		return
 	}
 
