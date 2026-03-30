@@ -1,13 +1,13 @@
 package controller
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/MirzovalievShodmon/miniBank.git/internal/models"
 	"github.com/MirzovalievShodmon/miniBank.git/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 type patchBalance struct {
@@ -23,6 +23,10 @@ type transferRequest struct {
 func getAllAccounts(c *gin.Context) {
 	accounts, err := service.GetAllAccounts()
 	if err != nil {
+		log.Error().
+			Str("module", "controller").
+			Err(err).
+			Msg("Сбой при получении списка всех счетов")
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -48,6 +52,11 @@ func getAccountsByOwner(c *gin.Context) {
 
 	accounts, err := service.GetAccountsByOwner(name)
 	if err != nil {
+		log.Error().
+			Str("module", "controller").
+			Str("search_term", name).
+			Err(err).
+			Msg("Сбой при поиске аккаунтов по владельцу")
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "ошибка поиска",
 		})
@@ -74,7 +83,11 @@ func topUpAccount(c *gin.Context) {
 
 	var req patchBalance
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Printf("[API] Ошибка парсинга JSON при пополнении ID %d", id)
+		log.Error().
+			Str("module", "controller").
+			Int("account_id", id).
+			Err(err).
+			Msg("Ошибка парсинга JSON при пополнении")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Неверный формат суммы",
 		})
@@ -88,10 +101,18 @@ func topUpAccount(c *gin.Context) {
 		return
 	}
 
-	log.Printf("[API] Получен запрос на ПОПОЛНЕНИЕ: ID %d, Сумма %d", id, req.Amount)
+	log.Info().
+		Str("module", "controller").
+		Int("account_id", id).
+		Int64("сумма", req.Amount).
+		Msg("Запрос на пополнение принят")
 	err = service.TopUpAccount(id, req.Amount)
 	if err != nil {
-		log.Printf("[API] Сбой операции пополнения ID %d: %v", id, err)
+		log.Error().
+			Str("module", "controller").
+			Int("account_id", id).
+			Err(err).
+			Msg("Сбой операции пополнения в сервисе")
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -115,7 +136,11 @@ func withdrawAccount(c *gin.Context) {
 
 	var req patchBalance
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Printf("[API] Ошибка парсинга JSON при снятии со счета ID %d: %v", id, err)
+		log.Error().
+			Str("module", "controller").
+			Int("account_id", id).
+			Err(err).
+			Msg("Ошибка парсинга JSON при снятии")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Неверный формат суммы",
 		})
@@ -129,10 +154,18 @@ func withdrawAccount(c *gin.Context) {
 		return
 	}
 
-	log.Printf("[API] Получен запрос на СНЯТИЕ: ID %d, Сумма %d", id, req.Amount)
+	log.Info().
+		Str("module", "controller").
+		Int("account_id", id).
+		Int64("сумма", req.Amount).
+		Msg("Запрос на снятие принят")
 	err = service.WithdrawAccount(id, req.Amount)
 	if err != nil {
-		log.Printf("[API] Сбой операции снятия ID %d: %v", id, err)
+		log.Error().
+			Str("module", "controller").
+			Int("account_id", id).
+			Err(err).
+			Msg("Сбой операции снятия в сервисе")
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -147,14 +180,22 @@ func withdrawAccount(c *gin.Context) {
 func transferAccount(c *gin.Context) {
 	var req transferRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Printf("[API] Ошибка парсинга JSON при ПЕРЕВОДЕ: %v", err)
+		log.Error().
+			Str("module", "controller").
+			Err(err).
+			Msg("Ошибка парсинга JSON при переводе")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "неверный формат JSON",
 		})
 		return
 	}
 
-	log.Printf("[API] Запрос на ПЕРЕВОД: от %d к %d, сумма %d", req.FromID, req.ToID, req.Amount)
+	log.Info().
+		Str("module", "controller").
+		Int("from_id", req.FromID).
+		Int("to_id", req.ToID).
+		Int64("сумма", req.Amount).
+		Msg("Запрос на перевод принят")
 	if req.FromID == req.ToID {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "нельзя перевести деньги самому себе",
@@ -171,7 +212,12 @@ func transferAccount(c *gin.Context) {
 
 	newBalance, err := service.Transfer(req.FromID, req.ToID, req.Amount)
 	if err != nil {
-		log.Printf("[API] Сбой перевода %d -> %d: %v", req.FromID, req.ToID, err)
+		log.Error().
+			Str("module", "controller").
+			Int("from_id", req.FromID).
+			Int("to_id", req.ToID).
+			Err(err).
+			Msg("Сбой перевода в сервисе")
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
 		})
@@ -195,6 +241,11 @@ func getTransactionsByAccountID(c *gin.Context) {
 	}
 	history, err := service.GetTransactionsByAccountID(id)
 	if err != nil {
+		log.Error().
+			Str("module", "controller").
+			Int("account_id", id). // Логируем ID, чтобы знать, где проблема
+			Err(err).
+			Msg("Сбой при получении истории транзакций")
 		c.JSON(500, gin.H{
 			"error": "ошибка при получении истории",
 		})

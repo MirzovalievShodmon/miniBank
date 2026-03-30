@@ -2,27 +2,38 @@ package service
 
 import (
 	"errors"
-	"log"
 	"time"
 
 	"github.com/MirzovalievShodmon/miniBank.git/internal/db"
 	"github.com/MirzovalievShodmon/miniBank.git/internal/models"
 	"github.com/MirzovalievShodmon/miniBank.git/internal/repository"
+	"github.com/rs/zerolog/log"
 )
 
 func GetAllAccounts() ([]models.Account, error) {
 	conn := db.GetDBConnection()
-	return repository.GetAllAccounts(conn)
+	accounts, err := repository.GetAllAccounts(conn)
+	if err != nil {
+		log.Error().Str("module", "service").Err(err).Msg("Сбой получения списка счетов")
+	}
+	return accounts, err
 }
 
 func GetAccountsByOwner(ownerName string) ([]models.Account, error) {
 	conn := db.GetDBConnection()
-	return repository.GetAccountsByOwner(conn, ownerName)
+	accounts, err := repository.GetAccountsByOwner(conn, ownerName)
+	if err != nil {
+		log.Error().Str("module", "service").Str("owner", ownerName).Err(err).Msg("Сбой поиска по владельцу")
+	}
+	return accounts, err
 }
 
 func TopUpAccount(accountID int, amount int64) error {
-	log.Printf("[SERVICE] Попытка пополнения счета ID %d на сумму %d", accountID, amount)
-
+	log.Info().
+		Str("module", "service").
+		Int("account_id", accountID).
+		Int64("amount", amount).
+		Msg("Начало пополнения счета")
 	conn := db.GetDBConnection()
 	//Начинаем транзакцию
 	tx, err := conn.Beginx()
@@ -56,12 +67,16 @@ func TopUpAccount(accountID int, amount int64) error {
 		return err
 	}
 
-	log.Printf("[SUCCES] Счет %d пополнен на %d", accountID, amount)
+	log.Info().Str("module", "service").Int("account_id", accountID).Msg("Пополнение успешно завершено")
 	return nil
 }
 
 func WithdrawAccount(accountID int, amount int64) error {
-	log.Printf("[SERVICE] Попытка снятия со счета ID %d на сумму %d", accountID, amount)
+	log.Info().
+		Str("module", "service").
+		Int("account_id", accountID).
+		Int64("amount", amount).
+		Msg("Начало снятия средств")
 
 	conn := db.GetDBConnection()
 	// Начинаем транзакцию
@@ -78,7 +93,12 @@ func WithdrawAccount(accountID int, amount int64) error {
 	}
 
 	if account.Balance < amount {
-		log.Printf("[WARN] Отказ в снятии: на счету %d недостаточно средств", accountID)
+		log.Warn().
+			Str("module", "service").
+			Int("account_id", accountID).
+			Int64("balance", account.Balance).
+			Int64("requested", amount).
+			Msg("Отказ: недостаточно средств")
 		return errors.New("недостаточно средств на счета")
 	}
 
@@ -99,15 +119,21 @@ func WithdrawAccount(accountID int, amount int64) error {
 	}
 
 	if err = tx.Commit(); err != nil {
+		log.Error().Str("module", "service").Int("account_id", accountID).Err(err).Msg("Ошибка при Commit пополнения")
 		return err
 	}
 
-	log.Printf("[SUCCESS] Со счета %d снято %d", accountID, amount)
+	log.Info().Str("module", "service").Int("account_id", accountID).Msg("Снятие успешно завершено")
 	return nil
 }
 
 func Transfer(fromID int, toID int, amount int64) (int64, error) {
-	log.Printf("[SERVICE] Инициация перевода: от %d к %d на сумму %d", fromID, toID, amount)
+	log.Info().
+		Str("module", "service").
+		Int("from_id", fromID).
+		Int("to_id", toID).
+		Int64("amount", amount).
+		Msg("Инициация перевода")
 
 	conn := db.GetDBConnection()
 	tx, err := conn.Beginx() // начинаем транзакцию
@@ -122,7 +148,10 @@ func Transfer(fromID int, toID int, amount int64) (int64, error) {
 		return 0, errors.New("отправитель не найден")
 	}
 	if fromAcc.Balance < amount {
-		log.Printf("[WARN] Перевод отменен: у счета %d недостаточно денег", fromID)
+		log.Warn().
+			Str("module", "service").
+			Int("from_id", fromID).
+			Msg("Перевод отменен: недостаточно денег")
 		return 0, errors.New("недостаточно денег")
 	}
 
@@ -146,6 +175,11 @@ func Transfer(fromID int, toID int, amount int64) (int64, error) {
 		return 0, err
 	}
 
-	log.Printf("[SUCCESS] Перевод выполнен: %d -> %d (%d)", fromID, toID, amount)
+	log.Info().
+		Str("module", "service").
+		Int("from_id", fromID).
+		Int("to_id", toID).
+		Msg("Перевод успешно выполнен")
+
 	return newBalance, nil
 }

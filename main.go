@@ -1,34 +1,42 @@
 package main
 
 import (
-	"log"
+	"os"
 
 	"github.com/MirzovalievShodmon/miniBank.git/internal/controller"
 	"github.com/MirzovalievShodmon/miniBank.git/internal/db"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	log.Println("---  Запуск приложения miniBank ---")
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
+	log.Info().Str("module", "main").Msg("--- Запуск приложения miniBank ---")
 	if err := db.InitConnection(); err != nil {
-		log.Printf("Критическая Ошибка: База не пдключена: %v", err)
+		log.Error().Str("module", "main").Err(err).Msg("Критическая Ошибка: База не подключена")
 		return
 	}
-	log.Println("Соединение с базой данных установлено")
+	log.Info().Str("module", "main").Msg("Соединение с базой данных установлено")
 
 	if err := db.RunMigrations(); err != nil {
-		log.Printf("Критическая Ошибка: Таблицы не созданы: %v", err)
+		log.Error().Str("module", "main").Err(err).Msg("Критическая Ошибка: Таблицы не созданы")
 		return
 	}
-	log.Println("Миграции базы данных успешно применены")
+	log.Info().Str("module", "main").Msg("Миграции базы данных успешно применены")
 
-	log.Println("Запуск веб-сервиса на порту :7556...")
+	log.Info().Str("module", "main").Msg("Запуск веб-сервиса на порту :7556...")
 	if err := controller.InitRoutes(); err != nil {
-		log.Printf("Предупреждение: Ошибка http-сервиса: %v", err)
+		log.Warn().
+			Str("module", "main").
+			Err(err).
+			Msg("Предупреждение: Ошибка http-сервиса")
 	}
 
 	if err := db.CloseConnection(); err != nil {
-		log.Printf("Ошибка при закрытии базы: %v", err)
+		log.Error().Str("module", "main").Err(err).Msg("Ошибка при закрытии базы")
 		return
 	}
-	log.Println("--- Приложение miniBank завершило работу ---")
+	log.Info().Msg("--- Приложение miniBank завершило работу ---")
 }

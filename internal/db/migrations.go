@@ -1,7 +1,7 @@
 package db
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -23,21 +23,29 @@ const (
 )
 
 func RunMigrations() error {
-	log.Println("[DB] Создание таблицы accounts...")
+	log.Info().Str("module", "database").Msg("Запуск миграций: создание таблицы accounts...")
 	_, err := db.Exec(createTableAccountsDDL)
 	if err != nil {
-		log.Printf("[ERROR] Не удалось создать таблицу accounts: %v", err)
+		log.Error().
+			Str("module", "database").
+			Str("table", "accounts").
+			Err(err).
+			Msg("Не удалось создать таблицу accounts")
 		return err
 	}
-	log.Println("[DB] Таблтца accounts готова")
+	log.Info().Str("module", "database").Str("table", "accounts").Msg("Таблица accounts готова")
 
-	log.Println("[DB] Создание таблицы transactions...")
+	log.Info().Str("module", "database").Msg("Запуск миграций: создание таблицы transactions...")
 	_, err = db.Exec(createTableTransactionsDDL)
 	if err != nil {
-		log.Printf("[ERROR] Не удалось создать таблицу transactions: %v", err)
+		log.Error().
+			Str("module", "database").
+			Str("table", "transactions").
+			Err(err).
+			Msg("Не удалось создать таблицу transactions")
 		return err
 	}
-	log.Println("[DB] Таблица transactions готова")
+	log.Info().Str("module", "database").Str("table", "transactions").Msg("Таблица transactions готова")
 
 	return nil
 }
