@@ -10,6 +10,42 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// CreateAccount создает новый счет для пользователя
+func CreateAccount(userID int, accountName string) (*models.Account, error) {
+	log.Info().
+		Str("module", "service").
+		Int("user_id", userID).
+		Str("account_name", accountName).
+		Msg("Создание нового счета")
+
+	conn := db.GetDBConnection()
+
+	account := models.Account{
+		UserID:   userID,
+		Name:     accountName,
+		Balance:  0,
+		IsActive: true,
+	}
+
+	newAccount, err := repository.CreateAccount(conn, account)
+	if err != nil {
+		log.Error().
+			Str("module", "service").
+			Int("user_id", userID).
+			Err(err).
+			Msg("Ошибка создания счета")
+		return nil, err
+	}
+
+	log.Info().
+		Str("module", "service").
+		Int("user_id", userID).
+		Int("account_id", newAccount.ID).
+		Msg("Счет успешно создан")
+
+	return &newAccount, nil
+}
+
 func GetAllAccounts() ([]models.Account, error) {
 	conn := db.GetDBConnection()
 	accounts, err := repository.GetAllAccounts(conn)

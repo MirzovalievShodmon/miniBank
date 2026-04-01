@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MirzovalievShodmon/miniBank.git/internal/middleware"
 	"github.com/MirzovalievShodmon/miniBank.git/internal/models"
 	"github.com/MirzovalievShodmon/miniBank.git/internal/service"
 	"github.com/gin-gonic/gin"
@@ -39,6 +40,59 @@ func getAllAccounts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, accounts)
+}
+
+func createAccount(c *gin.Context) {
+	userID, exists := middleware.GetCurrentUserID(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Пользователь не авторизован",
+		})
+		return
+	}
+
+	var req models.CreateAccountRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Error().
+			Str("module", "controller").
+			Int("user_id", userID).
+			Err(err).
+			Msg("Ошибка парсинга JSON при создании счета")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Неверный формат данных",
+		})
+		return
+	}
+
+	log.Info().
+		Str("module", "controller").
+		Int("user_id", userID).
+		Str("account_name", req.Name).
+		Msg("Запрос на создание счета")
+
+	account, err := service.CreateAccount(userID, req.Name)
+	if err != nil {
+		log.Error().
+			Str("module", "controller").
+			Int("user_id", userID).
+			Err(err).
+			Msg("Ошибка создания счета")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	log.Info().
+		Str("module", "controller").
+		Int("user_id", userID).
+		Int("account_id", account.ID).
+		Msg("Счет успешно создан")
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Счет успешно создан",
+		"account": account,
+	})
 }
 
 func getAccountsByOwner(c *gin.Context) {

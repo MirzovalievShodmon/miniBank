@@ -1,0 +1,32 @@
+# Файлы переменных окружения (содержат чувствительную информацию)
+.env
+.env.local
+.env.*.local
+
+# Бинарные файлы Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+miniBank
+miniBank.exe
+
+# Тестовые файлы
+*.test
+
+# Кэш Go
+go.sum
+
+# IDE файлы
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Логи
+*.log
+
+# Временные файлы
+*.tmp
+*.temp
